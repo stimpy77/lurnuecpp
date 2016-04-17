@@ -56,8 +56,8 @@ private:
 	FString currentWord = "undefined";
 	FString getNewHiddenWord();
 	bool IsIsogram(FString word);
-	const int32 wordCount = 4;
-	const FString words[4] = { "horse", "cow", "zebra", "choice" };
+	const int32 wordCount = 7;
+	const FString words[7] = { "horse", "cow", "ding", "zebra", "disarm", "orgasmic", "isogram" };
 	int32 IncrementTryCount(int32);
-	TMap<int32, int32> wordLengthToMaxTries{ { 3,5 },{ 4,5 },{ 5,6 },{ 6,7 } };
+	TMap<int32, int32> wordLengthToMaxTries{ { 3,5 },{ 4,5 },{ 5,6 },{ 6,7 }, {7, 9}, {8, 10} };
 };
