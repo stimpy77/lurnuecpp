@@ -84,30 +84,32 @@ FString FBullCowGame::PromptNewGuess()
 	IncrementTryCount(0);
 	FString guess = "";
 	EGuessValidity validation;
-	while ((validation = Validate(guess)) != EGuessValidity::OK)
+	while ((validation = Validate(guess)) != EGuessValidity::OK && triesInputted < maxTries-1)
 	{
 		switch (validation)
 		{
 		case EGuessValidity::BadChars:
-			std::cout << "Please enter ONE WORD (a-z lowercase only).\n";
+			std::cout << "Invalid input. Please enter ONE WORD (a-z lowercase only).\n";
 			break;
 		case EGuessValidity::NotIsogram:
-			std::cout << "That is not an isogram! An isogram must not have repeating letters.\n";
+			std::cout << "WRONG!!! That is not an isogram! An isogram must not have repeating letters.\n";
+			std::cout << "You've been penalized a turn.\n";
 			IncrementTryCount(1);
 			break;
 		case EGuessValidity::WrongLength:
 			std::cout << "Wrong length! My word is " << currentWord.length() << " long, yours was " << guess.length() << " long.\n";
+			std::cout << "You've been penalized a turn.\n";
 			IncrementTryCount(1);
 			break;
 		}
 
 		std::cout << "Guess my " << currentWord.length() << "-letter isogram: ";
 		std::getline(std::cin, guess);
-	}
-	if (guess == "exit")
-	{
-		wantExit = true;
-		return "";
+		if (guess == "exit")
+		{
+			wantExit = true;
+			return "";
+		}
 	}
 	std::cout << "You guessed " + guess + ".\n\n";
 	return guess;
