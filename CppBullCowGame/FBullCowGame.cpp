@@ -1,6 +1,9 @@
+#include <algorithm>
+#include <string>
 #include <cstdlib> 
 #include <ctime>
 #include "FBullCowGame.h"
+#define TMap std::map
 
 int32 FBullCowGame::getUserTries() const { return triesInputted; }
 bool FBullCowGame::isWon() const { return currentBullCowCount.IsMatch; }
@@ -49,13 +52,10 @@ EGuessValidity FBullCowGame::Validate(FString word)
 
 bool FBullCowGame::IsIsogram(FString word)
 {
-	for (int32 c = 0; c < word.length(); c++)
-	{		
-		char ch = word[c];
-		for (int32 p = 0; p < c; p++)
-		{
-			if (word[p] == word[c]) return false;
-		}
+	int32 aToZ['z']{};
+	for (char c : word)
+	{
+		if (aToZ[c]++ > 0) return false;
 	}
 	return true;
 }
@@ -63,7 +63,7 @@ bool FBullCowGame::IsIsogram(FString word)
 int32 FBullCowGame::IncrementTryCount(int32 incr)
 {
 	triesInputted += incr;
-	std::cout << "Try " << (triesInputted + 1) << ". ";
+	std::cout << "\nTry " << (triesInputted + 1) << ". ";
 	std::cout << "You have " << (maxTries - triesInputted) << " tries left including this one.\n";
 	return triesInputted;
 }
@@ -105,6 +105,7 @@ FString FBullCowGame::PromptNewGuess()
 
 		std::cout << "Guess my " << currentWord.length() << "-letter isogram: ";
 		std::getline(std::cin, guess);
+		//std::transform(guess.begin(), guess.end(), guess.begin(), ::tolower);
 		if (guess == "exit")
 		{
 			wantExit = true;
@@ -168,9 +169,16 @@ void FBullCowGame::PrintGuessResult()
 	std::cout << std::endl;
 }
 
-void FBullCowGame::PrintGameOver()
+void FBullCowGame::PrintGameSummary()
 {
 	std::cout << "GAME OVER\n";
+	if (currentBullCowCount.IsMatch) {
+		std::cout << "You are a big fat winner.\n";
+	}
+	else
+	{
+		std::cout << "You are a big fat LOSER!!\n";
+	}
 }
 
 bool FBullCowGame::PromptPlayAgain()

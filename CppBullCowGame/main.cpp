@@ -33,7 +33,7 @@ void playGame()
 			bcGame.SubmitGuess(guess);
 			bcGame.PrintGuessResult();
 			if (!bcGame.isUserStillInGame())
-				bcGame.PrintGameOver();
+				bcGame.PrintGameSummary();
 		}
 	} while (!bcGame.getUserWantsToExit() && bcGame.PromptPlayAgain());
 }

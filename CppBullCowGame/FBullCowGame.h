@@ -41,7 +41,7 @@ public:
 	FBullCowCount MatchGuess();
 	bool isUserStillInGame() const;
 	void PrintGuessResult();
-	void PrintGameOver();
+	void PrintGameSummary();
 	bool PromptPlayAgain();
 	void PrintAllPossibleWords();
 
