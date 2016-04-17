@@ -1,8 +1,3 @@
-/*
-This is the console shell executable program which makes use of the FBullCowGame class.
-This acts as the view in an MVC pattern, and is responsiblef or all user interaction.
-For game logic, see the FBullCowGame class.
-*/
 
 #include <iostream>
 #include <string>
