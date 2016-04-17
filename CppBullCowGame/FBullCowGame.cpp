@@ -3,12 +3,10 @@
 #include <cstdlib> 
 #include <ctime>
 #include "FBullCowGame.h"
-#define TMap std::map
 
 int32 FBullCowGame::getUserTries() const { return triesInputted; }
 bool FBullCowGame::isWon() const { return currentBullCowCount.IsMatch; }
 bool FBullCowGame::getUserWantsToExit() const { return wantExit; }
-int32 FBullCowGame::getMaxTries() const { return maxTries; }
 
 FBullCowGame::FBullCowGame()
 {
@@ -19,7 +17,6 @@ void FBullCowGame::Reset()
 {
 	constexpr int32 MAX_TRIES = 8;
 
-	maxTries = MAX_TRIES;
 	triesInputted = 0;
 	currentGuess = "";
 	currentBullCowCount = FBullCowCount();
@@ -33,6 +30,10 @@ FString FBullCowGame::getNewHiddenWord()
 	srand((unsigned)time(0));
 	int32 rnd = rand() % wordCount;
 	return words[rnd];
+}
+
+int32 FBullCowGame::getMaxTries() { 
+	return wordLengthToMaxTries[currentWord.length()];
 }
 
 EGuessValidity FBullCowGame::Validate(FString word)
@@ -52,10 +53,10 @@ EGuessValidity FBullCowGame::Validate(FString word)
 
 bool FBullCowGame::IsIsogram(FString word)
 {
-	int32 aToZ['z']{};
+	int32 aToZ[(int32)'z'+1]{};
 	for (char c : word)
 	{
-		if (aToZ[c]++ > 0) return false;
+		if (aToZ[(int32)c]++ > 0) return false;
 	}
 	return true;
 }
@@ -63,8 +64,7 @@ bool FBullCowGame::IsIsogram(FString word)
 int32 FBullCowGame::IncrementTryCount(int32 incr)
 {
 	triesInputted += incr;
-	std::cout << "\nTry " << (triesInputted + 1) << ". ";
-	std::cout << "You have " << (maxTries - triesInputted) << " tries left including this one.\n";
+	std::cout << "\nTry " << (triesInputted + 1) << " [" << (triesInputted + 1) << "/" << getMaxTries() << "]\n";
 	return triesInputted;
 }
 
@@ -84,7 +84,7 @@ FString FBullCowGame::PromptNewGuess()
 	IncrementTryCount(0);
 	FString guess = "";
 	EGuessValidity validation;
-	while ((validation = Validate(guess)) != EGuessValidity::OK && triesInputted < maxTries-1)
+	while ((validation = Validate(guess)) != EGuessValidity::OK && triesInputted < getMaxTries()-1)
 	{
 		switch (validation)
 		{
@@ -149,7 +149,7 @@ FBullCowCount FBullCowGame::MatchGuess()
 	return result;
 }
 
-bool FBullCowGame::isUserStillInGame() const
+bool FBullCowGame::isUserStillInGame()
 {
 	return !currentBullCowCount.IsMatch && getUserTries() < getMaxTries();
 }
@@ -174,10 +174,52 @@ void FBullCowGame::PrintGameSummary()
 	std::cout << "GAME OVER\n";
 	if (currentBullCowCount.IsMatch) {
 		std::cout << "You are a big fat winner.\n";
+
+		std::cout << "                                       /;    ;\\\n";
+		std::cout << "                                   __  \\\\____//\n";
+		std::cout << "                                  /{_\\_/   `'\\____\n";
+		std::cout << "                                  \\___   (o)  (o  }\n";
+		std::cout << "       _____________________________/          :--'\n";
+		std::cout << "   ,-,'`@@@@@@@@       @@@@@@         \\_    `__\n";
+		std::cout << "  ;:(  @@@@@@@@@        @@@             \\___(o'o)\n";
+		std::cout << "  :: )  @@@@          @@@@@@        ,'@@(  `===='\n";
+		std::cout << "  :: : @@@@@:          @@@@         `@@@:\n";
+		std::cout << "  :: \\  @@@@@:       @@@@@@@)    (  '@@@'\n";
+		std::cout << "  ;; /\\      /`,    @@@@@@@@@\\   :@@@@@)                \n";
+		std::cout << "  ::/  )    {_----------------:  :~`,~~;\n";
+		std::cout << " ;;'`; :   )                  :  / `; ;\n";
+		std::cout << ";;;; : :   ;                  :  ;  ; :\n";
+		std::cout << "`'`' / :  :                   :  :  : :\n";
+		std::cout << "    )_ \\__;      \";\"          :_ ;  \\_\\       `,','\n";
+		std::cout << "    :__\\  \\    * `,'*         \\  \\  :  \\   *  8`;'*  * \n";
+		std::cout << "        `^'     \\ :/           `^'  `-^-'   \\v/ :  \\/   \n";
 	}
 	else
 	{
 		std::cout << "You are a big fat LOSER!!\n";
+		std::cout << "      db         db             \n";
+		std::cout << "    d88           88             \n";
+		std::cout << "   888            888             \n";
+		std::cout << "  d88             888b         \n";
+		std::cout << "  888             d88P         \n";
+		std::cout << "  Y888b  /``````\\8888             \n";
+		std::cout << ",----Y888        Y88P`````\\     \n";
+		std::cout << "|        ,'`\\_/``\\ |,,    |     \n";
+		std::cout << " \\,,,,-| | o | o / |  ```'     \n";
+		std::cout << "       |  """ """  |             \n";
+		std::cout << "      /             \\             \n";
+		std::cout << "     |               \\         \n";
+		std::cout << "     |  ,,,,----'''```|         \n";
+		std::cout << "     |``   @    @     |         \n";
+		std::cout << "      \\,,    ___    ,,/         \n";
+		std::cout << "         \\__|   |__/             \n";
+		std::cout << "            | | |                 \n";
+		std::cout << "            \\_|_/                 \n";
+		std::cout << "                                 \n";
+		std::cout << "     _                         \n";
+		std::cout << " \\\\ |_|  _   _  _  _  _  | //     \n";
+		std::cout << "    |   (_\\ |  |  |  |_| o     \n";
+		std::cout << "                     |         \n";
 	}
 }
 
@@ -186,7 +228,7 @@ bool FBullCowGame::PromptPlayAgain()
 	FString tryAgainAnswer = "";
 	while (tryAgainAnswer.length() < 1 || (tryAgainAnswer[0] != 'y' && tryAgainAnswer[0] != 'Y' && tryAgainAnswer[0] != 'n' && tryAgainAnswer[0] != 'N'))
 	{
-		std::cout << "Would you like to try a new game?\n";
+		std::cout << "Would you like to try a new game?\n (y/n) ";
 		std::getline(std::cin, tryAgainAnswer);
 	}
 	return tryAgainAnswer[0] == 'y' || tryAgainAnswer[0] == 'Y';

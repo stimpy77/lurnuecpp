@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <string>
+#include <map>
+#define TMap std::map
 
 using FString = std::string;
 using FText = std::string;
@@ -30,7 +32,7 @@ public:
 	FBullCowGame();
 	void Reset();
 	void PrintIntro();
-	int32 getMaxTries() const;
+	int32 getMaxTries();
 	int32 getUserTries() const;
 	void PrintQuestion();
 	bool isWon() const;
@@ -39,14 +41,13 @@ public:
 	void SubmitGuess(FString guess);
 	FString PromptNewGuess();
 	FBullCowCount MatchGuess();
-	bool isUserStillInGame() const;
+	bool isUserStillInGame();
 	void PrintGuessResult();
 	void PrintGameSummary();
 	bool PromptPlayAgain();
 	void PrintAllPossibleWords();
 
 private:
-	int32 maxTries;
 	int32 triesInputted;
 	bool processedCurrentGuess = false;
 	bool wantExit = false;
@@ -55,7 +56,8 @@ private:
 	FString currentWord = "undefined";
 	FString getNewHiddenWord();
 	bool IsIsogram(FString word);
-	const int32 wordCount = 3;
-	const FString words[3] = { "horse", "cow", "zebra" };
+	const int32 wordCount = 4;
+	const FString words[4] = { "horse", "cow", "zebra", "choice" };
 	int32 IncrementTryCount(int32);
+	TMap<int32, int32> wordLengthToMaxTries{ { 3,5 },{ 4,5 },{ 5,6 },{ 6,7 } };
 };
