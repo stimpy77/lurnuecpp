@@ -1,7 +1,9 @@
+#include <cstdlib> 
+#include <ctime>
 #include "FBullCowGame.h"
 
 int32 FBullCowGame::getUserTries() const { return triesInputted; }
-bool FBullCowGame::isWon() const { return won; }
+bool FBullCowGame::isWon() const { return currentBullCowCount.IsMatch; }
 bool FBullCowGame::getUserWantsToExit() const { return wantExit; }
 int32 FBullCowGame::getMaxTries() const { return maxTries; }
 
@@ -17,9 +19,53 @@ void FBullCowGame::Reset()
 	maxTries = MAX_TRIES;
 	triesInputted = 0;
 	currentGuess = "";
-	won = false;
+	currentBullCowCount = FBullCowCount();
 	wantExit = false;
 	processedCurrentGuess = false;
+	currentWord = getNewHiddenWord();
+}
+
+FString FBullCowGame::getNewHiddenWord()
+{
+	srand((unsigned)time(0));
+	int32 rnd = rand() % wordCount;
+	return words[rnd];
+}
+
+EGuessValidity FBullCowGame::Validate(FString word)
+{
+	if (word == "") return EGuessValidity::Empty;
+	if (word.length() != currentWord.length()) return EGuessValidity::WrongLength;
+	const FString validChars = "abcdefghijklmnopqrstuvwxyz";
+	for (int32 c = 0; c < word.length(); c++)
+	{
+		char ch = word[c];
+		if (validChars.find(ch) == std::string::npos) return EGuessValidity::BadChars;
+	}
+	if (!IsIsogram(word))
+		return EGuessValidity::NotIsogram;
+	return EGuessValidity::OK;
+}
+
+bool FBullCowGame::IsIsogram(FString word)
+{
+	for (int32 c = 0; c < word.length(); c++)
+	{		
+		char ch = word[c];
+		for (int32 p = 0; p < c; p++)
+		{
+			if (word[p] == word[c]) return false;
+		}
+	}
+	return true;
+}
+
+int32 FBullCowGame::IncrementTryCount(int32 incr)
+{
+	triesInputted += incr;
+	std::cout << "Try " << (triesInputted + 1) << ". ";
+	std::cout << "You have " << (maxTries - triesInputted) << " tries left including this one.\n";
+	return triesInputted;
 }
 
 void FBullCowGame::PrintIntro()
@@ -29,50 +75,63 @@ void FBullCowGame::PrintIntro()
 
 void FBullCowGame::PrintQuestion()
 {
-	std::cout << "Can you guess the " << currentWord.length();
-	std::cout << " letter isogram I'm thinking of?\n";
+	std::cout << "Can you guess the " << currentWord.length() << " letter isogram I'm thinking of?\n";
 }
 
 FString FBullCowGame::PromptNewGuess()
 {
-	std::cout << "Try " << (triesInputted + 1) << ". ";
-	std::cout << "You have " << (maxTries - triesInputted) << " tries including this one left.\n";
+	processedCurrentGuess = false;
+	IncrementTryCount(0);
 	FString guess = "";
-	while (!CheckValidity(guess))
+	EGuessValidity validation;
+	while ((validation = Validate(guess)) != EGuessValidity::OK)
 	{
-		std::cout << "Enter your guess: ";
-		std::getline(std::cin, guess);
-		if (guess == "exit")
+		switch (validation)
 		{
-			wantExit = true;
-			return "";
+		case EGuessValidity::BadChars:
+			std::cout << "Please enter ONE WORD (a-z lowercase only).\n";
+			break;
+		case EGuessValidity::NotIsogram:
+			std::cout << "That is not an isogram! An isogram must not have repeating letters.\n";
+			IncrementTryCount(1);
+			break;
+		case EGuessValidity::WrongLength:
+			std::cout << "Wrong length! My word is " << currentWord.length() << " long, yours was " << guess.length() << " long.\n";
+			IncrementTryCount(1);
+			break;
 		}
+
+		std::cout << "Guess my " << currentWord.length() << "-letter isogram: ";
+		std::getline(std::cin, guess);
 	}
-
-	std::cout << "You guessed " + guess + ".\n";
-	NewGuess(guess);
-
+	if (guess == "exit")
+	{
+		wantExit = true;
+		return "";
+	}
+	std::cout << "You guessed " + guess + ".\n\n";
 	return guess;
 }
 
-void FBullCowGame::NewGuess(FString guess)
+void FBullCowGame::SubmitGuess(FString guess)
 {
 	currentGuess = guess;
 	triesInputted++;
+	FBullCowGame::MatchGuess();
 }
 
 FBullCowCount FBullCowGame::MatchGuess()
 {
+	if (processedCurrentGuess) return currentBullCowCount;
 	processedCurrentGuess = true;
-	bool isMatch = won = (currentGuess == currentWord);
 	FBullCowCount result;
-	for (int32 c = 0; c < currentGuess.length(); c++)
+	for (int32 c = 0; c < currentGuess.length(); c++)
 	{
 		if (c < currentWord.length())
 		{
-			if (currentGuess[c] == currentWord[c])
+			if (c < currentWord.length() && currentGuess[c] == currentWord[c])
 				result.Bulls++;
-			else if (currentGuess[c] != currentWord[c])
+			else
 			{
 				for (int32 cc = 0; cc < currentWord.length(); cc++)
 				{
@@ -82,19 +141,19 @@ FBullCowCount FBullCowGame::MatchGuess()
 			}
 		}
 	}
-	result.IsMatch = isMatch;
+	result.IsMatch = currentGuess == currentWord;
 	currentBullCowCount = result;
 	return result;
 }
 
 bool FBullCowGame::isUserStillInGame() const
 {
-	return !won && getUserTries() < getMaxTries();
+	return !currentBullCowCount.IsMatch && getUserTries() < getMaxTries();
 }
 
 void FBullCowGame::PrintGuessResult()
 {
-	if ((processedCurrentGuess && won) || MatchGuess().IsMatch) {
+	if ((processedCurrentGuess && currentBullCowCount.IsMatch) || MatchGuess().IsMatch) {
 		std::cout << "YOU GUESSED RIGHT!! *fireworks* *confetti*";
 	}
 	else
@@ -106,14 +165,10 @@ void FBullCowGame::PrintGuessResult()
 	}
 	std::cout << std::endl;
 }
-bool FBullCowGame::CheckValidity(FString str)
-{
-	return str != "";
-}
 
 void FBullCowGame::PrintGameOver()
 {
-	std::cout << "\nGame over.\n\n";
+	std::cout << "GAME OVER\n";
 }
 
 bool FBullCowGame::PromptPlayAgain()
@@ -126,3 +181,17 @@ bool FBullCowGame::PromptPlayAgain()
 	}
 	return tryAgainAnswer[0] == 'y' || tryAgainAnswer[0] == 'Y';
 }
+
+void FBullCowGame::PrintAllPossibleWords()
+{
+	std::cout << "Here are all possible words:\n";
+	for (int32 w = 0; w < wordCount; w++)
+	{
+		if (w > 0) std::cout << ", ";
+		if (w % 5 == 0) std::cout << std::endl;
+		std::cout << words[w];
+	}
+	std::cout << "\n\n";
+}
+
+

@@ -15,6 +15,15 @@ struct FBullCowCount
 	bool IsMatch = false;
 };
 
+enum class EGuessValidity
+{
+	OK,
+	NotIsogram,
+	BadChars,
+	WrongLength,
+	Empty
+};
+
 class FBullCowGame {
 
 public:
@@ -26,22 +35,27 @@ public:
 	void PrintQuestion();
 	bool isWon() const;
 	bool getUserWantsToExit() const;
-	bool CheckValidity(FString);
-	void NewGuess(FString guess);
+	EGuessValidity Validate(FString guess);
+	void SubmitGuess(FString guess);
 	FString PromptNewGuess();
 	FBullCowCount MatchGuess();
 	bool isUserStillInGame() const;
 	void PrintGuessResult();
 	void PrintGameOver();
 	bool PromptPlayAgain();
+	void PrintAllPossibleWords();
 
 private:
 	int32 maxTries;
 	int32 triesInputted;
-	bool won;
 	bool processedCurrentGuess = false;
 	bool wantExit = false;
 	FBullCowCount currentBullCowCount;
 	FString currentGuess = "";
-	FString currentWord = "horse";
+	FString currentWord = "undefined";
+	FString getNewHiddenWord();
+	bool IsIsogram(FString word);
+	const int32 wordCount = 3;
+	const FString words[3] = { "horse", "cow", "zebra" };
+	int32 IncrementTryCount(int32);
 };

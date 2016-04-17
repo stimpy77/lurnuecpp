@@ -24,10 +24,13 @@ void playGame()
 	{
 		bcGame.Reset();
 		bcGame.PrintQuestion();
+		bcGame.PrintAllPossibleWords();
 		while (!bcGame.getUserWantsToExit() && bcGame.isUserStillInGame())
 		{
-			bcGame.PromptNewGuess();
+			FString guess = bcGame.PromptNewGuess();
 			if (bcGame.getUserWantsToExit()) break;
+
+			bcGame.SubmitGuess(guess);
 			bcGame.PrintGuessResult();
 			if (!bcGame.isUserStillInGame())
 				bcGame.PrintGameOver();
